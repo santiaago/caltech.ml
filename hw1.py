@@ -24,41 +24,12 @@ answer that makes the expression jyour answer  given optionj closest to 0).'''
 from random import uniform
 from random import randint
 
-def data(N = 10):
-    'return N random points (x1,x2)'
-    d = []
-    for i in range(N):
-        x =  uniform(-1,1)
-        y =  uniform(-1,1)
-        d.append([x,y])
-    return d
+from tools import data
+from tools import randomline
+from tools import target_function
+from tools import build_training_set
+from tools import sign
 
-def randomline():
-    'computes a random line and returns a and b params: y = ax + b'
-    x1 = uniform(-1,1)
-    y1 = uniform(-1,1)
-    x2 = uniform(-1,1)
-    y2 = uniform(-1,1)
-    
-    a = abs(x1-x2)/abs(y1-y2)
-    b = y1 - a*x1
-    return [a,b] # a*x + b
-
-def map_x(point,f):
-    'maps a point (x1,x2) to a sign -+1 following function f '
-    x1 = point[0]
-    y1 = point[1]
-    
-    y = f(x1)
-    compare_to = y1
-    return sign(y,compare_to)
-
-def sign(x,compare_to = 0):
-    'returns +1 or -1 by comparing x to compare_to param (by default = 0)'
-    if x > compare_to:
-        return +1
-    else:
-        return -1
 
 def build_misclassified_set(t_set,w):
     '''returns a tuple of index of t_set items
@@ -81,29 +52,25 @@ def h(w,x):
     return sign(res)
 
 def PLA(N_points = 10):
-    ''' Returns 
-    t_set: item of t_set is: [[vector_x], y]
-    w: vector of same dimention as vector_x of weights
-    iteration: Number of iterations needed for convergence
-    f: target lambda function f
+    ''' 
+    Returns: (t_set,w,iteration,f)
+    -t_set: item of t_set is: [[vector_x], y]
+    -w: vector of same dimention as vector_x of weights
+    -iteration: Number of iterations needed for convergence
+    -f: target lambda function f
     '''
     N = N_points
     iteration = 0
     # create random contelation of points () in interval [-1,1]
-    d = data(N)
     # create random target function
-    l = randomline()
-    # print 'Target function: %s x + %s' %(l[0], l[1])
-    f = lambda x: l[0]*x + l[1]
-    # weight vector w0 , w1, w2 
-    w = [0,0,0] 
     # build training set
-    t_set = []
     
-    for i in range(len(d)):
-        x = d[i]
-        y = map_x(x,f) # map x to +1 or -1 for training points
-        t_set.append( [ [ 1 ,x[0],x[1] ] , y ] )
+    d = data(N)
+    l = randomline()
+    f = target_function(l)
+    t_set = build_training_set(d,f)
+
+    w = [0,0,0] # weight vector w0 , w1, w2  
 
     #iterate Perceptron Algorithm
     iterate = True
