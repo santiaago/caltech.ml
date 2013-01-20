@@ -29,9 +29,9 @@ def target_function(l):
 def sign(x,compare_to = 0):
     'returns +1 or -1 by comparing x to compare_to param (by default = 0)'
     if x > compare_to:
-        return +1
+        return +1.
     else:
-        return -1
+        return -1.
 
 def map_point(point,f):
     'maps a point (x1,x2) to a sign -+1 following function f '

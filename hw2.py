@@ -6,12 +6,15 @@ Tails = 1
 N_COINS = 1000
 N_TOSS = 10
 N_EXPERIMENT = 100000
+HEAD = 0
+TAILS = 1
 
 from random import randint
 
 #--------------------------------------------------
 #Hoeffding inequality
-def main():
+
+def hoeffding_inequality():
     table_v1 = []
     table_vrand = []
     table_vmin = []
@@ -27,7 +30,7 @@ def main():
         # Cmin is a coin which had the minimum frequency of heads
         cmin = compute_min_frec_heads(coins)
         #print_coins(c1,crand,cmin)
-        # append values of fractions for average after experiment
+
         table_v1.append(fractionOfHeads(c1))
         table_vrand.append(fractionOfHeads(crand))
         table_vmin.append(fractionOfHeads(cmin))
@@ -45,10 +48,11 @@ def main():
     
 
 def fractionOfHeads(c):
-    return c.count(0)/(N_TOSS*1.0)
+    'fractions of Heads in list c'
+    return c.count(HEAD)/(N_TOSS*1.0)
 
 def compute_min_frec_heads(coins):
-    'min frec of head (head = 0 )'
+    'minimum frecuency of heads in list coins '
     
     f_heads = [fractionOfHeads(c) for c in coins]
     
@@ -72,6 +76,7 @@ def print_vs(v1,vrand,vmin):
     print 'vmin = %s' % (str(vmin))
 
 def flip_coin(n = N_TOSS):
+    'list of n experiment between 0 and 1 randomly'
     return  [randint(0,1) for i in range(n)]
 
 #--------------------------------------------------------------------------
@@ -83,33 +88,25 @@ from tools import target_function
 from tools import build_training_set
 from tools import sign
 
+from hw1 import PLA
+
 from numpy import array
 from numpy import transpose
 from numpy.linalg import pinv as pinv # pseudo inverse aka dagger
 from numpy.linalg import norm
 from numpy import dot
+from numpy import sign
 
 verbose_lr = False
-def linear_regression(N_points = 100):
-    d = data(N_points)
-    l = randomline()
-    f = target_function(l)
-
-    t_set = build_training_set(d,f)
-
+def linear_regression(N_points,d,t_set):
+    '''
+    d = constelation of points
+    t_set = training set. [vector_x, vector_y] 
+    '''
+   
     y_vector = target_vector(t_set)
     X_matrix = input_data_matrix(t_set)
     X_pseudo_inverse = pseudo_inverse(X_matrix)
-
-    if verbose_lr:
-        print 'y: %s'% y_vector
-        print '----------'
-        print 'X: %s' %X_matrix
-        print '----------'
-        print 'X pseudo inverse: %s '%X_pseudo_inverse
-        print '----------'
-        print 'wlin: %s' %(dot(X_pseudo_inverse,y_vector) )
-        print '----------'
 
     return dot(X_pseudo_inverse,y_vector),X_matrix,y_vector
 
@@ -118,29 +115,77 @@ def run_linear_regression(N_samples,N_points):
     print 'Each sample has %s data points' %str(N_points)
 
     Ein_avg = []
+    Eout_avg = []
+
     for i in range(N_samples):
-        wlin,X,y = linear_regression(N_points)
+
+        d = data(N_points)
+        l = randomline()
+        f = target_function(l)
+        t_set = build_training_set(d,f)
+
+        wlin,X,y = linear_regression(N_points,d,t_set)
+
         Ein = compute_Ein(wlin,X,y)
         Ein_avg.append(Ein)
-        if verbose_lr:
-            print 'Ein: %s '% Ein
+
+        Eout = compute_Eout(wlin,f,N_points)
+        Eout_avg.append(Eout)
+        
     print 'Average Ein: %s' %(sum(Ein_avg)/(N_samples*1.0))
+    print 'Average Eout: %s' %(sum(Eout_avg)/(N_samples*1.0))
+
+def run_lr_and_pla(N_samples, N_points):
+    print 'running Linear Regression on %s samples' %N_samples
+    print 'Each samples has %s data points' %N_points
+    
+    iteration_avg = []
+    for i in range(N_samples):
+
+        d = data(N_points)
+        l = randomline()
+        f = target_function(l)
+        t_set = build_training_set(d,f)
+        
+        wlin,X,y = linear_regression(N_points,d,t_set)
+        
+        w_pla,iteration = PLA_v2(N_points,wlin,f,t_set)
+        iteration_avg.append(iteration)
+    
+    print 'Average Number of iterations is : %s' %(sum(iteration_avg)/(N_samples*1.0))
+        
+def compute_Eout(wlin,f,N_points):
+    'number of out-of-sample points misclassifed / total number of out-of-sample points'
+    
+    d = data(N_points)
+    t_set = build_training_set(d,f)
+    
+    X_matrix = input_data_matrix(t_set)
+    y_vector = target_vector(t_set)
+    
+    g_vector = dot(X_matrix,wlin)
+    for i in range(len(g_vector)):
+        g_vector[i] = sign(g_vector[i])
+    
+    vEout = g_vector - y_vector
+    nEout = 0
+    for i in range(len(vEout)):
+        if vEout[i]!=0:
+            nEout = nEout + 1
+    Eout = nEout/(len(vEout)*1.0)
+    return Eout
 
 def compute_Ein(wlin, X, y):
     'fraction of in sample points which got classified incorrectly'
     N = len(y)
-    g_vector = dot(X,wlin) #X * wlin
-    for i in range(len(g_vector)):
-        g_vector[i] = sign(g_vector[i])
-
+    g_vector = sign(dot(X,wlin))
+    
     vEin = g_vector - y
     nEin = 0
     for i in range(len(vEin)):
-        if vEin[i]!= 0:
-            nEin = nEin + 1
+        if vEin[i]!= 0: nEin = nEin + 1
 
-    Ein = nEin / (len(vEin) *1.0)
-    return Ein
+    return nEin / (len(vEin) *1.0)
     
 def target_vector(t_set):
     y = array([t[1] for t in t_set])

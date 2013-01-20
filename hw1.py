@@ -30,6 +30,8 @@ from tools import target_function
 from tools import build_training_set
 from tools import sign
 
+from numpy import array
+
 
 def build_misclassified_set(t_set,w):
     '''returns a tuple of index of t_set items
@@ -51,66 +53,57 @@ def h(w,x):
         res = res + w[i]*x[i]
     return sign(res)
 
-def PLA(N_points = 10):
+def PLA(N_points,w,f,t_set):
     ''' 
-    Returns: (t_set,w,iteration,f)
-    -t_set: item of t_set is: [[vector_x], y]
-    -w: vector of same dimention as vector_x of weights
-    -iteration: Number of iterations needed for convergence
-    -f: target lambda function f
+    - t_set: item of t_set is: [[vector_x], y]
+    - w: vector of same dimention as vector_x of weights
+    - iteration: Number of iterations needed for convergence
+    - f: target lambda function f
+    
+    Perceptron Algorithm:
+    - pick a misclasified point from misclassified set
+    - if there are no misclassified points break iteration weight are ok. break iteration.
+    - if there is a misclassified point update weights
     '''
     N = N_points
     iteration = 0
-    # create random contelation of points () in interval [-1,1]
-    # create random target function
-    # build training set
-    
-    d = data(N)
-    l = randomline()
-    f = target_function(l)
-    t_set = build_training_set(d,f)
-
-    w = [0,0,0] # weight vector w0 , w1, w2  
-
-    #iterate Perceptron Algorithm
     iterate = True
-    count = 0
+
     while iterate:
-        iteration = iteration + 1
-        #pick a misclasified point from misclassified set
+        iteration = iteration + 1        
         misclassified_set = build_misclassified_set(t_set,w)
-        # if there are no misclassified points break iteration weight are ok.
-        if len(misclassified_set)==0:break
+        if len(misclassified_set)==0 : break
         index = randint(0,len(misclassified_set)-1)
-        p = misclassified_set[index]
-        point = t_set[p][0]
+        j = misclassified_set[index]
+        point = t_set[j][0]
 
         s = h(w,point)
-        yn = t_set[p][1]
+        yn = t_set[j][1]
 
-        # update weights if misclassified
         if s != yn:
             xn = point
             w[0] = w[0] + yn*xn[0]
             w[1] = w[1] + yn*xn[1]
             w[2] = w[2] + yn*xn[2]
-    return t_set,w,iteration,f
+    return w,iteration
 
 def evaluate_diff_f_g(f,w):
     'Returns the average of difference between f and g (g is equivalent as vector w )'
     count = 0
     limit = 100
     diff = 0
+    # generate random point as out of sample data
+    # check result and count if there is a difference
+    # between target function f and hypothesis function g
     while count < limit:
         count = count + 1
-        # generate random point as out of sample data
         x = uniform(-1,1)
         y = uniform(-1,1)
         vector = [1,x,y]
 
         sign_f = sign(f(x),y)
         sign_g = h(w,vector)
-        # check result and count if difference between target function f and hypothesis function g
+
         if sign_f != sign_g: diff = diff + 1
 
     return diff/(count*1.0)
@@ -124,7 +117,14 @@ def run_PLA(N_samples,N_points):
 
     for i in range(N_samples):
         # run PLA in sample
-        t_set,w,iteration,f = PLA(N_points)
+        d = data(N_points)
+        l = randomline()
+        f = target_function(l)
+        t_set = build_training_set(d,f)
+        w = [0,0,0]
+
+        w,iteration = PLA(N_points,w,f,t_set)
+
         iterations.append(iteration)
         # check if points are classified or not
         for i in range(len(t_set)):
@@ -135,6 +135,7 @@ def run_PLA(N_samples,N_points):
                 samples.append(0)
                 b_misclassified = True
                 break
+
         # check difference between f and g
         diff.append(evaluate_diff_f_g(f,w))
         if not b_misclassified: samples.append(1)
