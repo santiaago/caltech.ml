@@ -86,7 +86,9 @@ from tools import data
 from tools import randomline
 from tools import target_function
 from tools import build_training_set
+from tools import build_training_set_fmultipleparams
 from tools import sign
+from tools import print_avg
 
 from hw1 import PLA
 
@@ -98,7 +100,7 @@ from numpy import dot
 from numpy import sign
 
 verbose_lr = False
-def linear_regression(N_points,d,t_set):
+def linear_regression(N_points,t_set):
     '''
     d = constelation of points
     t_set = training set. [vector_x, vector_y] 
@@ -124,7 +126,7 @@ def run_linear_regression(N_samples,N_points):
         f = target_function(l)
         t_set = build_training_set(d,f)
 
-        wlin,X,y = linear_regression(N_points,d,t_set)
+        wlin,X,y = linear_regression(N_points,t_set)
 
         Ein = compute_Ein(wlin,X,y)
         Ein_avg.append(Ein)
@@ -132,8 +134,8 @@ def run_linear_regression(N_samples,N_points):
         Eout = compute_Eout(wlin,f,N_points)
         Eout_avg.append(Eout)
         
-    print 'Average Ein: %s' %(sum(Ein_avg)/(N_samples*1.0))
-    print 'Average Eout: %s' %(sum(Eout_avg)/(N_samples*1.0))
+    print_avg('Ein',Ein_avg)
+    print_avg('Eout',Eout_avg)
 
 def run_lr_and_pla(N_samples, N_points):
     print 'running Linear Regression on %s samples' %N_samples
@@ -147,12 +149,12 @@ def run_lr_and_pla(N_samples, N_points):
         f = target_function(l)
         t_set = build_training_set(d,f)
         
-        wlin,X,y = linear_regression(N_points,d,t_set)
+        wlin,X,y = linear_regression(N_points,t_set)
         
-        w_pla,iteration = PLA_v2(N_points,wlin,f,t_set)
+        w_pla,iteration = PLA(N_points,wlin,f,t_set)
         iteration_avg.append(iteration)
     
-    print 'Average Number of iterations is : %s' %(sum(iteration_avg)/(N_samples*1.0))
+    print_avg('Number of iterations',iteration_avg)
         
 def compute_Eout(wlin,f,N_points):
     'number of out-of-sample points misclassifed / total number of out-of-sample points'
@@ -197,3 +199,155 @@ def input_data_matrix(t_set):
 
 def pseudo_inverse(X):
     return pinv(X)
+
+#--------------------------------------------------------------------------
+#Nonlinear Transformation
+
+def generate_t_set(N,f=None):
+    '''
+    Generate a training set of N = 1000 points on X = [1; 1] * [1; 1] with uniform
+    probability of picking each x that belongs X . Generate simulated noise by 
+    fipping the sign of a random 10% subset of the generated training set
+    '''
+    d = data(N)
+    if f is None:
+        f = lambda x: sign(x[0]**2 + x[1]**2 -0.6)
+    
+    t_set = build_training_set_fmultipleparams(d,f)
+    t_set = t_set_errorNoise(t_set,N/10)
+        
+    return t_set,f
+
+def t_set_errorNoise(t_set, Nnoise):
+    for i in range(Nnoise):
+        j = randint(0,Nnoise-1)
+        t_set[j][1] = t_set[j][1]*-1
+        #t_set[j][0][1] = t_set[j][0][1]*-1
+        #t_set[j][0][2] = t_set[j][0][2]*-1
+    return t_set
+
+def run_nonlinear_transformation(N_samples, N_points):
+    
+    Ein_avg = []
+    Eout_avg = []
+    Eintrans_avg = []
+    EdiffA = []
+    EdiffB = []
+    EdiffC = []
+    EdiffD = []
+    EdiffE = []
+
+    for i in range(N_samples):
+
+        t_set,f = generate_t_set(N_points)
+        wlin,X,y = linear_regression(N_points,t_set)
+        Ein = compute_Ein(wlin, X, y)
+        Ein_avg.append(Ein)
+
+        #transform the training data into the following nonlinear feature vector:
+        #(1; x1; x2; x1x2; x1^2; x2^2)
+        t_set_trans = transform_t_set(t_set)
+        wtrans,Xtrans,ytrans = linear_regression(N_points,t_set_trans)
+        Eintrans = compute_Ein(wtrans,Xtrans,ytrans)
+        Eintrans_avg.append(Eintrans)
+    
+        h_vector =sign(dot(Xtrans,wtrans))
+        gA_vector = compute_g_vector(t_set_trans,'a')
+        Ediff_a = compute_avg_difference(h_vector,gA_vector)
+        EdiffA.append(1-Ediff_a)
+        
+        gB_vector = compute_g_vector(t_set_trans,'b')
+        Ediff_b = compute_avg_difference(h_vector,gB_vector)
+        EdiffB.append(1-Ediff_b)
+
+        gC_vector = compute_g_vector(t_set_trans,'c')
+        Ediff_c = compute_avg_difference(h_vector,gC_vector)
+        EdiffC.append(1-Ediff_c)
+        
+        gD_vector = compute_g_vector(t_set_trans,'d')
+        Ediff_d = compute_avg_difference(h_vector,gD_vector)
+        EdiffD.append(1-Ediff_d)
+        
+        gE_vector = compute_g_vector(t_set_trans,'e')
+        Ediff_e = compute_avg_difference(h_vector,gE_vector)
+        EdiffE.append(1-Ediff_e)
+
+        Eout = compute_Eout_nonlineartrans(wtrans,f,N_points)
+        Eout_avg.append(Eout)
+
+    print_avg('Ein',Ein_avg)
+    print_avg('Ein Transformed',Eintrans_avg)
+    print_avg('P of agreeing A',EdiffA)
+    print_avg('P of agreeing B',EdiffB)
+    print_avg('P of agreeing C',EdiffC)
+    print_avg('P of agreeing D',EdiffD)
+    print_avg('P of agreeing E',EdiffE)
+    print_avg('Eout',Eout_avg)
+
+def compute_Eout_nonlineartrans(w,f,N_points):
+    'number of out-of-sample points misclassifed / total number of out-of-sample points'
+    
+    # generate N fresh points (f will not change) with noise
+    t_set,f = generate_t_set(N_points,f)
+    t_set_trans = transform_t_set(t_set)
+    
+    X_matrix = input_data_matrix(t_set_trans)
+    y_vector = target_vector(t_set_trans)
+
+    g_vector = dot(X_matrix,w)
+    for i in range(len(g_vector)):
+        g_vector[i] = sign(g_vector[i])
+    
+    vEout = g_vector - y_vector
+    nEout = 0
+    for i in range(len(vEout)):
+        if vEout[i]!=0:
+            nEout = nEout + 1
+    Eout = nEout/(len(vEout)*1.0)
+    return Eout
+
+def transform_t_set(t_set):
+    t_set_trans = []
+    for i in range(len(t_set)):
+        x1 = t_set[i][0][1]
+        x2 = t_set[i][0][2]
+        tX = [1,x1,x2, x1*x2, x1**2, x2**2]
+        t_set_trans.append([ tX , t_set[i][1] ])
+
+    return t_set_trans
+
+def compute_avg_difference(v1,v2):
+    vDiff = v1 - v2
+    nE = 0
+    for i in range(len(vDiff)):
+        if vDiff[i]!= 0: nE = nE + 1
+    return nE / (len(vDiff) *1.0)
+
+def compute_g_vector(t_set,g_f):
+    g = []
+    for t in t_set:
+        x1 = t[0][1]
+        x2 = t[0][2]
+        if g_f == 'a': g.append(gA(x1,x2))
+        if g_f == 'b': g.append(gB(x1,x2))
+        if g_f == 'c': g.append(gC(x1,x2))
+        if g_f == 'd': g.append(gD(x1,x2))
+        if g_f == 'e': g.append(gE(x1,x2))
+
+    return g
+
+def gA(x1,x2):
+    #g(x1; x2) = sign(-1 -0.05x1 + 0.08x2 + 0.13x1x2 + 1.5x1^2 + 1.5x2^2)
+    return sign(-1 - 0.05*x1 + 0.08*x2 + 0.13*x1*x2 + 1.5*x1**2 + 1.5*x2**2)
+def gB(x1,x2):
+    #g(x1; x2) = sign(-1 -0.05x1 + 0.08x2 + 0.13x1x2 + 1.5x1^2 + 15x2^2)
+    return sign(-1  -0.05*x1 + 0.08*x2 + 0.13*x1*x2 + 1.5*x1**2 + 15*x2**2)
+def gC(x1,x2):
+    #g(x1; x2) = sign(-1 -0.05x1 + 0.08x2 + 0.13x1x2 + 15x1^2 + 1.5x2^2)
+    return sign(-1 -0.05*x1 + 0.08*x2 + 0.13*x1*x2 + 15*x1**2 + 1.5*x2**2)
+def gD(x1,x2):
+    #g(x1; x2) = sign(-1 -1.5x1 + 0.08x2 + 0.13x1x2 + 0.05x1^2 + 0.05x2^2)
+    return sign(-1 -1.5*x1 + 0.08*x2 + 0.13*x1*x2 + 0.05*x1**2 + 0.05*x2**2)
+def gE(x1,x2):
+    #g(x1; x2) = sign(-1 -0.05x1 + 0.08x2 + 1.5x1x2 + 0.15x1^2 + 0.15x2^2)
+    return sign(-1 -0.05*x1 + 0.08*x2 + 1.5*x1*x2 + 0.15*x1**2 + 0.15*x2**2)

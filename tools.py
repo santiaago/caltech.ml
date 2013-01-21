@@ -42,6 +42,12 @@ def map_point(point,f):
     compare_to = y1
     return sign(y,compare_to)
 
+def map_point_fmultipleparams(point,f):
+    y1 = point[1]
+    y = f(point)
+    compare_to = y1
+    return sign(y,compare_to)
+
 def build_training_set(data, func):
     t_set = []
     for i in range(len(data)):
@@ -50,3 +56,14 @@ def build_training_set(data, func):
         t_set.append([ [ 1.0, point[0],point[1] ] , y ])
     return t_set
 
+def build_training_set_fmultipleparams(data,func):
+    t_set = []
+    for i in range(len(data)):
+        point = data[i]
+        y = map_point_fmultipleparams(point,func)
+        t_set.append([ [ 1.0, point[0],point[1] ] , y ])
+    return t_set
+
+
+def print_avg(name,vector):
+    print 'Average %s: %s'%(name,sum(vector)/(len(vector)*1.0))
