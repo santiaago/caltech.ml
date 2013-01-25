@@ -222,8 +222,6 @@ def t_set_errorNoise(t_set, Nnoise):
     for i in range(Nnoise):
         j = randint(0,Nnoise-1)
         t_set[j][1] = t_set[j][1]*-1
-        #t_set[j][0][1] = t_set[j][0][1]*-1
-        #t_set[j][0][2] = t_set[j][0][2]*-1
     return t_set
 
 def run_nonlinear_transformation(N_samples, N_points):
@@ -351,3 +349,15 @@ def gD(x1,x2):
 def gE(x1,x2):
     #g(x1; x2) = sign(-1 -0.05x1 + 0.08x2 + 1.5x1x2 + 0.15x1^2 + 0.15x2^2)
     return sign(-1 -0.05*x1 + 0.08*x2 + 1.5*x1*x2 + 0.15*x1**2 + 0.15*x2**2)
+
+def tests():
+    #-1-2
+    hoeffding_inequality()
+    #3
+    #4
+    #5-6
+    run_linear_regression(1000,100)
+    #-7
+    run_lr_and_pla(1000, 10)
+    #8-9-10
+    run_nonlinear_transformation(1000, 1000)
