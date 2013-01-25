@@ -15,6 +15,11 @@ from random import randint
 #Hoeffding inequality
 
 def hoeffding_inequality():
+    '''average experiment on N_EXPERIMENT times
+    toss the N_COINS N_TOSS times
+    get c1, crand and cmin
+    print average of each
+    '''
     table_v1 = []
     table_vrand = []
     table_vmin = []
@@ -61,6 +66,7 @@ def compute_min_frec_heads(coins):
     return coins[id_min_frec_heads]
 
 def print_coins(c1,crand,cmin):
+    'print c1, crand and cmin as well as their fraction of Heads'
     print 'c1 = %s' % (str(c1))
     print 'v1 = %s' % (str(fractionOfHeads(c1)))
 
@@ -71,6 +77,7 @@ def print_coins(c1,crand,cmin):
     print 'vmin = %s' %(str(fractionOfHeads(cmin)))
 
 def print_vs(v1,vrand,vmin):
+    'print v1 vrand and vmin'
     print 'v1 = %s' % (str(v1))
     print 'vrand = %s' % (str(vrand))
     print 'vmin = %s' % (str(vmin))
@@ -94,16 +101,17 @@ from hw1 import PLA
 
 from numpy import array
 from numpy import transpose
-from numpy.linalg import pinv as pinv # pseudo inverse aka dagger
-from numpy.linalg import norm
 from numpy import dot
 from numpy import sign
+from numpy.linalg import pinv as pinv # pseudo inverse aka dagger
+from numpy.linalg import norm
+
 
 verbose_lr = False
 def linear_regression(N_points,t_set):
-    '''
-    d = constelation of points
-    t_set = training set. [vector_x, vector_y] 
+    '''Linear regresion algorithm
+    from Y and X compute the dagger or pseudo matrix
+    return the Xdagger.Y as the w vector
     '''
    
     y_vector = target_vector(t_set)
@@ -113,6 +121,9 @@ def linear_regression(N_points,t_set):
     return dot(X_pseudo_inverse,y_vector),X_matrix,y_vector
 
 def run_linear_regression(N_samples,N_points):
+    '''runs on N_samples and with N_points a linear regression
+    computes Ein by average of the samples as well as Eout
+    '''
     print 'running Linear Regression on %s samples' %str(N_samples)
     print 'Each sample has %s data points' %str(N_points)
 
@@ -138,6 +149,10 @@ def run_linear_regression(N_samples,N_points):
     print_avg('Eout',Eout_avg)
 
 def run_lr_and_pla(N_samples, N_points):
+    '''runs on N_samples and with N_points a linear regresion
+    then from the weight vector runs PLA algorithm
+    compute the average number of iterations of PLA with this w vector
+    '''
     print 'running Linear Regression on %s samples' %N_samples
     print 'Each samples has %s data points' %N_points
     
@@ -190,14 +205,17 @@ def compute_Ein(wlin, X, y):
     return nEin / (len(vEin) *1.0)
     
 def target_vector(t_set):
+    'creates a numpy array (eg a Y matrix) from the training set'
     y = array([t[1] for t in t_set])
     return y
 
 def input_data_matrix(t_set):
+    'creates a numpy array (eg a X matrix) from the training set'
     X = array([t[0] for t in t_set])
     return X
 
 def pseudo_inverse(X):
+    'dagger of pseudo matrix used for linear regression'
     return pinv(X)
 
 #--------------------------------------------------------------------------
@@ -219,13 +237,24 @@ def generate_t_set(N,f=None):
     return t_set,f
 
 def t_set_errorNoise(t_set, Nnoise):
+    'introduce N% noise in the sign of the training set'
     for i in range(Nnoise):
         j = randint(0,Nnoise-1)
         t_set[j][1] = t_set[j][1]*-1
     return t_set
 
 def run_nonlinear_transformation(N_samples, N_points):
-    
+    '''use N_samples to have a consistent result
+    create a trainng set (1; x1; x2) from a constalation on N_points
+    runs linear regration from training set
+    computes Ein and averages it through all the samples
+    transform the training set following (1; x1; x2; x1x2; x1^2; x2^2)
+    run linear transformation on this transformed training set
+    compute Ein of transformed t_set and average through all the samples
+    create a hypothesis vector from the weight vector and the X matrix of the t_set transformed
+    Average for each function g the difference between the hypothesis vector and the function
+    finaly compute Eout from the f (target function) and the weight vector from training set that was not transformed
+    '''
     Ein_avg = []
     Eout_avg = []
     Eintrans_avg = []
@@ -305,6 +334,9 @@ def compute_Eout_nonlineartrans(w,f,N_points):
     return Eout
 
 def transform_t_set(t_set):
+    '''returns a training set built from a simple training [1,x1,x2] set and with
+    the following transformation: [1, x1, x2, x1*x2, x1^2, x2^2]
+    '''
     t_set_trans = []
     for i in range(len(t_set)):
         x1 = t_set[i][0][1]
@@ -315,6 +347,7 @@ def transform_t_set(t_set):
     return t_set_trans
 
 def compute_avg_difference(v1,v2):
+    'from to vectors compute the average number of differences between them'
     vDiff = v1 - v2
     nE = 0
     for i in range(len(vDiff)):
@@ -322,6 +355,7 @@ def compute_avg_difference(v1,v2):
     return nE / (len(vDiff) *1.0)
 
 def compute_g_vector(t_set,g_f):
+    'collect the values of the chosen function g and the provided training set'
     g = []
     for t in t_set:
         x1 = t[0][1]
@@ -334,6 +368,7 @@ def compute_g_vector(t_set,g_f):
 
     return g
 
+# G functions to compare to f.
 def gA(x1,x2):
     #g(x1; x2) = sign(-1 -0.05x1 + 0.08x2 + 0.13x1x2 + 1.5x1^2 + 1.5x2^2)
     return sign(-1 - 0.05*x1 + 0.08*x2 + 0.13*x1*x2 + 1.5*x1**2 + 1.5*x2**2)
