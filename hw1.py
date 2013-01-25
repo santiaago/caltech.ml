@@ -147,4 +147,14 @@ def run_PLA(N_samples,N_points):
     print 'number of iteration avg: %s ' % (str(sum(iterations)/len(iterations)*1.0))
     print 'average of difference in function g: %s' % ( sum(diff)/(len(diff)*1.0) )
 
-    
+def tests():
+    #-1
+    #-2
+    #-3
+    #-4-@
+    #-5-@
+    #-6
+    #-7-8
+    run_PLA(1000,10)
+    #-9-10
+    run_PLA(1000,100)
