@@ -1,6 +1,11 @@
 from random import uniform
 from random import randint
 
+def data_interval(low_b,high_b,N=100):
+    d = []
+    for i in range(N):
+        d.append(uniform(low_b,high_b))
+    return d
 def data(N = 10):
     'return N random points (x1,x2)'
     d = []
