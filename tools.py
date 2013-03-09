@@ -1,6 +1,11 @@
 from random import uniform
 from random import randint
 
+from numpy import array
+from numpy.linalg import pinv as pinv # pseudo inverse aka dagger
+from numpy import dot
+
+
 def data_interval(low_b,high_b,N=100):
     d = []
     for i in range(N):
@@ -31,6 +36,17 @@ def target_function(l):
     f = lambda x: l[0]*x + l[1]
     return f
 
+def target_random_function(l):
+    func = target_function(l)
+    def f(X):
+        x = X[0]
+        y = X[1]
+        if func(x) < y:
+            return 1.0
+        else:
+            return -1.0
+    return f
+
 def sign(x,compare_to = 0):
     'returns +1 or -1 by comparing x to compare_to param (by default = 0)'
     if x > compare_to:
@@ -42,7 +58,6 @@ def map_point(point,f):
     'maps a point (x1,x2) to a sign -+1 following function f '
     x1 = point[0]
     y1 = point[1]
-    
     y = f(x1)
     compare_to = y1
     return sign(y,compare_to)
@@ -72,3 +87,28 @@ def build_training_set_fmultipleparams(data,func):
 
 def print_avg(name,vector):
     print 'Average %s: %s'%(name,sum(vector)/(len(vector)*1.0))
+
+def target_vector(t_set):
+    'creates a numpy array (eg a Y matrix) from the training set'
+    y = array([t[1] for t in t_set])
+    return y
+
+def input_data_matrix(t_set):
+    'creates a numpy array (eg a X matrix) from the training set'
+    X = array([t[0] for t in t_set])
+    return X
+
+def pseudo_inverse(X):
+    'dagger of pseudo matrix used for linear regression'
+    return pinv(X)
+
+def linear_regression(N_points,t_set):
+    '''Linear regresion algorithm
+    from Y and X compute the dagger or pseudo matrix
+    return the Xdagger.Y as the w vector
+    '''
+    y_vector = target_vector(t_set)
+    X_matrix = input_data_matrix(t_set)
+    X_pseudo_inverse = pseudo_inverse(X_matrix)
+    return dot(X_pseudo_inverse,y_vector),X_matrix,y_vector
+

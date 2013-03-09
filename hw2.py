@@ -1,8 +1,4 @@
 
-'''
-Heads = 0
-Tails = 1
-'''
 N_COINS = 1000
 N_TOSS = 10
 N_EXPERIMENT = 100000
@@ -96,6 +92,10 @@ from tools import build_training_set
 from tools import build_training_set_fmultipleparams
 from tools import sign
 from tools import print_avg
+from tools import linear_regression
+from tools import target_vector
+from tools import input_data_matrix
+from tools import pseudo_inverse
 
 from hw1 import PLA
 
@@ -108,17 +108,6 @@ from numpy.linalg import norm
 
 
 verbose_lr = False
-def linear_regression(N_points,t_set):
-    '''Linear regresion algorithm
-    from Y and X compute the dagger or pseudo matrix
-    return the Xdagger.Y as the w vector
-    '''
-   
-    y_vector = target_vector(t_set)
-    X_matrix = input_data_matrix(t_set)
-    X_pseudo_inverse = pseudo_inverse(X_matrix)
-
-    return dot(X_pseudo_inverse,y_vector),X_matrix,y_vector
 
 def run_linear_regression(N_samples,N_points):
     '''runs on N_samples and with N_points a linear regression
@@ -195,6 +184,13 @@ def compute_Eout(wlin,f,N_points):
 def compute_Ein(wlin, X, y):
     'fraction of in sample points which got classified incorrectly'
     N = len(y)
+    print X
+    print '--'
+    print 'wlin'
+    print wlin
+    print 'dot'
+    print dot(X,wlin)
+    raw_input()
     g_vector = sign(dot(X,wlin))
     
     vEin = g_vector - y
@@ -204,20 +200,6 @@ def compute_Ein(wlin, X, y):
 
     return nEin / (len(vEin) *1.0)
     
-def target_vector(t_set):
-    'creates a numpy array (eg a Y matrix) from the training set'
-    y = array([t[1] for t in t_set])
-    return y
-
-def input_data_matrix(t_set):
-    'creates a numpy array (eg a X matrix) from the training set'
-    X = array([t[0] for t in t_set])
-    return X
-
-def pseudo_inverse(X):
-    'dagger of pseudo matrix used for linear regression'
-    return pinv(X)
-
 #--------------------------------------------------------------------------
 #Nonlinear Transformation
 
@@ -370,24 +352,19 @@ def compute_g_vector(t_set,g_f):
 
 # G functions to compare to f.
 def gA(x1,x2):
-    #g(x1; x2) = sign(-1 -0.05x1 + 0.08x2 + 0.13x1x2 + 1.5x1^2 + 1.5x2^2)
     return sign(-1 - 0.05*x1 + 0.08*x2 + 0.13*x1*x2 + 1.5*x1**2 + 1.5*x2**2)
 def gB(x1,x2):
-    #g(x1; x2) = sign(-1 -0.05x1 + 0.08x2 + 0.13x1x2 + 1.5x1^2 + 15x2^2)
     return sign(-1  -0.05*x1 + 0.08*x2 + 0.13*x1*x2 + 1.5*x1**2 + 15*x2**2)
 def gC(x1,x2):
-    #g(x1; x2) = sign(-1 -0.05x1 + 0.08x2 + 0.13x1x2 + 15x1^2 + 1.5x2^2)
     return sign(-1 -0.05*x1 + 0.08*x2 + 0.13*x1*x2 + 15*x1**2 + 1.5*x2**2)
 def gD(x1,x2):
-    #g(x1; x2) = sign(-1 -1.5x1 + 0.08x2 + 0.13x1x2 + 0.05x1^2 + 0.05x2^2)
     return sign(-1 -1.5*x1 + 0.08*x2 + 0.13*x1*x2 + 0.05*x1**2 + 0.05*x2**2)
 def gE(x1,x2):
-    #g(x1; x2) = sign(-1 -0.05x1 + 0.08x2 + 1.5x1x2 + 0.15x1^2 + 0.15x2^2)
     return sign(-1 -0.05*x1 + 0.08*x2 + 1.5*x1*x2 + 0.15*x1**2 + 0.15*x2**2)
 
 def tests():
     #-1-2
-    hoeffding_inequality()
+    #hoeffding_inequality()
     #3
     #4
     #5-6

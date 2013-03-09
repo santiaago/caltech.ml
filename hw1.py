@@ -90,7 +90,7 @@ def PLA(N_points,w,f,t_set):
 def evaluate_diff_f_g(f,w):
     'Returns the average of difference between f and g (g is equivalent as vector w )'
     count = 0
-    limit = 100
+    limit = 10000
     diff = 0
     # generate random point as out of sample data
     # check result and count if there is a difference
