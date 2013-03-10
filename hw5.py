@@ -1,22 +1,28 @@
-
 from copy import copy
 
 from math import exp
 from math import sqrt
 from math import log
 
+from random import shuffle
+
 from numpy import array
 from numpy import dot
 from numpy import array
 from numpy.linalg import norm
-
-from random import shuffle
 
 from tools import target_random_function
 from tools import randomline
 from tools import data
 from tools import build_training_set_fmultipleparams
 
+def run_linear_regression_error():
+    sigma = 0.1
+    d = 8
+    print 'sigma:%s d:%s '%(sigma,d)
+    lN = [10,25,100,500,1000]
+    for N in lN:
+        print 'For N:%s\t Ein:%s '%(N,linear_reg_err(sigma,d,N))
 
 def err(u,v):
     u = float(u)
@@ -64,47 +70,78 @@ def coordinate_descent():
         iteration = iteration + 1
     print "Iteration:%s, u: %s, v: %s E:%s" % (iteration,u,v,err(u,v))
 
-def gradient(sample, y,w):
-    vector = [y*1.0] + [y*x*1.0 for x in sample]
-    A = array([1]+sample)
+def gradient(s, y,w):
+    '''returns the gradient vector with respect to the current sample:s, 
+    the current target value:y, and the current weights:w'''
+    vector = [y*1.0] + [y*x*1.0 for x in s]
+    A = array([1]+s)
     B = array(w)
-    div =  (1.0 + exp(y*1.0*dot(A,B)))
-    vector = [-1.0 * x / div for x in vector]
-    return vector
+    d =  (1.0 + exp(y*1.0*dot(A,B)))
+    vG = [-1.0 * x / d for x in vector]
+    return vG
 
-def log_regression_sgd(t_set,eps,lr):
-    w = [0]*len(t_set[0][0])
+def has_converged(v1,v2,eps):
+    'returns true if the norm of the difference of the 2 vectors is less than epsilon'
+    V2 = array(v2)
+    V1 = array(v1)
+    return norm(V2 - V1) < eps
+
+def update_weights(w,g,lr):
+    '''update the weights given the current weights w and the gradient g
+    with respect to a learning rate lr'''
+    new_w = []
+    for j in range(len(w)):
+        new_w.append(w[j] - lr * g[j])
+    return new_w
+
+def log_regression_sgd(dataset,eps,lr):
+    '''runs stocastic gradient descent given:
+    dataset: data set with format [[w0,w1,...],target_value]
+    eps: epsilon
+    lr: learning rate
+    Returns:
+    - number of epochs to converge
+    - weight vector
+    '''
+    # initialize weight vector
+    w = [0]*len(dataset[0][0])
 
     converged = False
     nb_epochs = 0
     old_w = []
-    index_order = range(len(t_set))
+    # use index order to perform random shuffling without modifying the dataset
+    index_order = range(len(dataset))
     while not converged:
         old_w = copy(w)
         shuffle(index_order)
         for i in index_order:
-            s = t_set[i][0][1:]# get all params expect w0
-            y = t_set[i][1]
+            s = dataset[i][0][1:]# get all wi expect w0
+            y = dataset[i][1]
             grad = gradient(s,y,w)
-            
-            for j in range(len(w)):
-                w[j] = w[j] - lr * grad[j]
+            w = update_weights(w,grad,lr)
         nb_epochs += 1
-        W_old = array(old_w)
-        W = array(w)
-        converged = norm(W_old - W) < eps
+        converged = has_converged(w,old_w,eps)
     return nb_epochs,w
 
-def log_regression_compute_Eout(t_set,w):
+def log_regression_compute_Eout(dataset,w):
+    '''returns Eout using cross entropy error given:
+    - dataset: an out of sample data set with format [[w0,w1,...],targetValue]
+    - and a weight vector w '''
     cee = 0
-    for t in t_set:
-        x = t[0][1]
-        y = t[0][2]
-        target = t[1]
+    for d in dataset:
+        x = d[0][1]
+        y = d[0][2]
+        target = d[1]
         cee += cross_entropy_error([x,y],target,w)
-    return cee*1.0/len(t_set)
+    return cee*1.0/len(dataset)
 
 def cross_entropy_error(sample,y,w):
+    '''return the cross entropy error given:
+    - sample: parameters w[1:]
+    - y: target value for current sample
+    - w: weight vector
+    returns: log(1 + exp(-y*sample*w))
+    '''
     A = array([1]+sample)
     B = array(w)
     return log(1.0 + exp(-y*1.0*dot(A,B)))
@@ -121,16 +158,18 @@ def run_log_regression():
 
     for i in range(nb_runs):
 
+        # generate random function
         l = randomline()
         f = target_random_function(l)
-        
+        # generate in sample data and out of sample data
         data_in_sample = data(nb_in_sample)
         data_out_of_sample = data(nb_out_of_sample)
-        
+        # create training set structure [[w0,w1,...],target_value]
         t_set_in = build_training_set_fmultipleparams(data_in_sample,f)
         t_set_out = build_training_set_fmultipleparams(data_out_of_sample,f)
-        
+        # run logistic regression in sample
         epochs,w = log_regression_sgd(t_set_in,eps,lr)
+        # compute the out of sample error given the previously compute weights.
         e_out = log_regression_compute_Eout(t_set_out,w)
 
         print "Run: %s - epochs: %s"%(i, epochs)
@@ -147,12 +186,8 @@ def tests():
     print 'Tests begin'
     print '--------------------'
     print '-1-'
-    #sigma = 0.1
-    #d = 8
-    #print 'sigma:%s d:%s '%(sigma,d)
-    #lN = [10,25,100,500,1000]
-    #for N in lN:
-    #    print 'For N:%s\t Ein:%s '%(N,linear_reg_err(sigma,d,N))
+    print '-Linear regression error-'
+    #run_linear_regression_error()
     print '-5-'
     print '-Gradient descent-'
     #gradient_descent()
@@ -162,4 +197,4 @@ def tests():
     print '-Logistic regression-'
     print '-8-'
     print '-9-'
-    run_log_regression()
+    #run_log_regression()
