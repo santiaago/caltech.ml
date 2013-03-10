@@ -7,10 +7,13 @@ from numpy import dot
 
 
 def data_interval(low_b,high_b,N=100):
+    '''returns a vector of (N) values. 
+    Values are uniformly distributed between low boundary (low_b) and high boundary (high_b)'''
     d = []
     for i in range(N):
         d.append(uniform(low_b,high_b))
     return d
+
 def data(N = 10):
     'return N random points (x1,x2)'
     d = []
@@ -20,8 +23,20 @@ def data(N = 10):
         d.append([x,y])
     return d
 
+def data_from_file(filepath):
+    'from a filepath returns a dataset with the form [[x1,x2],y]'
+    datafile = open(filepath, 'r')
+    data = []
+    for line in datafile:
+        split = line.split()
+        x1 = float(split[0])
+        x2 = float(split[1])
+        y = float(split[2])
+        data.append([ [x1,x2],y ])
+    return data
+
 def randomline():
-    'computes a random line and returns a and b params: y = ax + b'
+    'computes a random line and returns [a,b] : y = ax + b'
     x1 = uniform(-1,1)
     y1 = uniform(-1,1)
     x2 = uniform(-1,1)
@@ -31,13 +46,19 @@ def randomline():
     b = y1 - a*x1
     return [a,b] # a*x + b
 
-def target_function(l):
-    # print 'Target function: %s x + %s' %(l[0], l[1]
-    f = lambda x: l[0]*x + l[1]
+def target_function(coords):
+    'from a coordinate input [a,b] returns the function a*x + b'
+    f = lambda x: coords[0]*x + coords[1]
     return f
 
-def target_random_function(l):
-    func = target_function(l)
+def target_random_function(coords):
+    '''
+    description: from a coordinate (coords) with the format [a,b] generated a random function.
+    - coord: a list of the form [a,b]
+    - returns: the generated random function that takes as argument a list with the form [x,y]
+    and returns 1 or -1 whether y is below the linear function defined by a*x + b or above.
+    '''
+    func = target_function(coords)
     def f(X):
         x = X[0]
         y = X[1]
@@ -48,7 +69,7 @@ def target_random_function(l):
     return f
 
 def sign(x,compare_to = 0):
-    'returns +1 or -1 by comparing x to compare_to param (by default = 0)'
+    'returns +1 or -1 by comparing (x) to (compare_to) param (by default = 0)'
     if x > compare_to:
         return +1.
     else:
@@ -83,7 +104,6 @@ def build_training_set_fmultipleparams(data,func):
         y = map_point_fmultipleparams(point,func)
         t_set.append([ [ 1.0, point[0],point[1] ] , y ])
     return t_set
-
 
 def print_avg(name,vector):
     print 'Average %s: %s'%(name,sum(vector)/(len(vector)*1.0))

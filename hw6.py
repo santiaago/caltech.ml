@@ -11,6 +11,8 @@ from numpy import identity
 from tools import target_vector
 from tools import input_data_matrix
 from tools import pseudo_inverse
+from tools import data_from_file
+from tools import linear_regression
 
 KA = -3
 LAMBDA = 10**KA
@@ -75,58 +77,55 @@ def run_nonlineartransformation(indata,outdata):
     t_set_trans = transform_t_set(indata)
     wtrans,Xtrans,ytrans = linear_regression(N_points,t_set_trans)
     print '-2-'
+    print 'Linear regression on training set after non linear transformation:'
     Eintrans = compute_Ein(wtrans,Xtrans,ytrans)
     Eouttrans = compute_Eout_nonlineartrans(wtrans,outdata)
-    print Eintrans
-    print Eouttrans
+    print 'in sample classification error: %s'%(Eintrans)
+    print 'out of sample classification error: %s'%(Eouttrans)
     print '-3-'
+    print 'Adding weight decay to linear regression with lambda = 10k and k = -3'
     w_decay = compute_weight_decay(wtrans,t_set_trans,Xtrans,ytrans,-3)
     Eintrans_decay = compute_Ein(w_decay,Xtrans,ytrans)
     Eouttrans_decay=compute_Eout_nonlineartrans(w_decay,outdata)
-    print Eintrans_decay
-    print Eouttrans_decay
+    print 'in sample classification error:%s'%(Eintrans_decay)
+    print 'out of sample classification error: %s'%(Eouttrans_decay)
     print '-4-'
+    print 'Using now k = 3'
     w_decay = compute_weight_decay(wtrans,t_set_trans,Xtrans,ytrans,3)
     Eintrans_decay = compute_Ein(w_decay,Xtrans,ytrans)
     Eouttrans_decay=compute_Eout_nonlineartrans(w_decay,outdata)
-    print Eintrans_decay
-    print Eouttrans_decay
+    print 'in sample classification error: %s'%(Eintrans_decay)
+    print 'out of sample classification error: %s'%(Eouttrans_decay)
     print '-5-'
-    for k in [2,1,0,-1,-2]:
+    Ks = [2,1,0,-1,-2]
+    print 'searching the lowest out of sample classification error for the following k values.'
+    print 'k in (%s)'%(str(Ks))
+    for k in Ks:
             w_decay = compute_weight_decay(wtrans,t_set_trans,Xtrans,ytrans,k)
             Eintrans_decay = compute_Ein(w_decay,Xtrans,ytrans)
             Eouttrans_decay=compute_Eout_nonlineartrans(w_decay,outdata)
-            print Eintrans_decay
-            print Eouttrans_decay
+            print 'K : %s'%(k)
+            print 'in sample classification error: %s'%(Eintrans_decay)
+            print 'out of sample classification error: %s'%(Eouttrans_decay)
     print '-6-'
+    print 'searching the minimum out of sample classification error by varying k in the integer values.'
     mink = 999
     minEout = 999
-    for k in range(-100,100):
+    for k in range(-200,200):
         w_decay = compute_weight_decay(wtrans,t_set_trans,Xtrans,ytrans,k)
         Eintrans_decay = compute_Ein(w_decay,Xtrans,ytrans)
         Eout_decay=compute_Eout_nonlineartrans(w_decay,outdata)
         if Eout_decay < minEout:
             minEout = Eout_decay
             mink = k
-    print k
-    print minEout
-
-def getData(filename):
-    datafile = open(filename, 'r')
-    data = []
-    for line in datafile:
-        split = line.split()
-        x1 = float(split[0])
-        x2 = float(split[1])
-        y = float(split[2])
-        data.append([ [x1,x2],y ])
-    return data
+    print 'K: %s'%(k)
+    print 'out of sample classification error: %s'%(minEout)
 
 def tests():
     print '-1-'
-    print '-2-'
-    indata  = getData('in.dta')
-    outdata = getData('out.dta')
+    indata  = data_from_file('in.dta')
+    outdata = data_from_file('out.dta')
     run_nonlineartransformation(indata,outdata)
     print '-8-'
-    demo()
+    print '-9-'
+    print '-10-'

@@ -1,3 +1,7 @@
+from math import sqrt
+
+from numpy import dot
+from numpy import sign
 
 from tools import linear_regression
 from tools import target_vector
@@ -6,12 +10,9 @@ from tools import sign
 
 from hw1 import evaluate_diff_f_g
 
-from math import sqrt
-
-from numpy import dot
-from numpy import sign
-
 def getData(filename):
+    '''returns a data set with format [[x1,x2],y]
+    Note: To be moved to Tools'''
     datafile = open(filename, 'r')
     data = []
     for line in datafile:

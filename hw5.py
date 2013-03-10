@@ -157,7 +157,6 @@ def run_log_regression():
     eps = 0.01
 
     for i in range(nb_runs):
-
         # generate random function
         l = randomline()
         f = target_random_function(l)
