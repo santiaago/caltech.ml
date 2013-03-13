@@ -4,7 +4,8 @@ from random import randint
 from numpy import array
 from numpy.linalg import pinv as pinv # pseudo inverse aka dagger
 from numpy import dot
-
+from numpy import eye
+from numpy import size
 
 def data_interval(low_b,high_b,N=100):
     '''returns a vector of (N) values. 
@@ -122,13 +123,15 @@ def pseudo_inverse(X):
     'dagger of pseudo matrix used for linear regression'
     return pinv(X)
 
-def linear_regression(N_points,t_set):
+def linear_regression(N_points,t_set,lda = 1.0):
     '''Linear regresion algorithm
     from Y and X compute the dagger or pseudo matrix
     return the Xdagger.Y as the w vector
+    default lambda is 1.0
     '''
     y_vector = target_vector(t_set)
     X_matrix = input_data_matrix(t_set)
-    X_pseudo_inverse = pseudo_inverse(X_matrix)
-    return dot(X_pseudo_inverse,y_vector),X_matrix,y_vector
+    #X_pseudo_inverse = pseudo_inverse(X_matrix)#+lda*eye(size(X_matrix,0)))
+    X_pseudo_inverse = pseudo_inverse(dot(X_matrix.T,X_matrix)+lda*eye(size(X_matrix,1)))
+    return dot(dot(X_pseudo_inverse,X_matrix.T),y_vector),X_matrix,y_vector
 

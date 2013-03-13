@@ -282,7 +282,7 @@ def run_reg_linear_reg_one_vs_all(dTrain,dTest):
     from tools import linear_regression
     from hw2 import compute_Ein
     from hw2 import transform_t_set
-    lda = 0.01
+    lda = 1.0
 
     for i in range(0,10):
         dTrain_current = getDataOneVsAll(dTrain,i)
@@ -310,7 +310,66 @@ def run_reg_linear_reg_one_vs_all(dTrain,dTest):
         print 'For %s vs all with transformation Eout = %s'%(i,compute_Ein(wtrans,xt,yt))
 
 def run_reg_linear_reg_one_vs_one(dTrain,dTest):
-    return None
+    from numpy import zeros
+    from numpy.linalg import pinv
+    from numpy import eye
+    from numpy import size
+    from numpy import array
+    from numpy import dot
+    from tools import linear_regression
+    from hw2 import compute_Ein
+    from hw2 import transform_t_set
+    lda1 = 0.01
+    lda2 = 1
+    # 1 vs 5
+    dTrain_current = getDataOneVsOne(dTrain,1,5)
+    t_set = []
+        # in sample
+    for d in dTrain_current:
+        t_set.append([[1,d[1],d[2]],d[0]])
+    # out of sample
+    dTest_current = getDataOneVsOne(dTest,1,5)
+    t_setout = []
+    t_setout2 = []
+    for d in dTest_current:
+        t_setout.append([[1,d[1],d[2]],d[0]])
+        t_setout2.append([[1,d[1],d[2]],d[0]])
+    print '--------------------------------------------------'
+    print 'lambda is: %s'%(lda1)
+    # in sample with no transform
+    wlin,X0,y0 = linear_regression(len(t_set),t_set,lda1)
+    print 'For 1 vs 5 Ein = %s'%(compute_Ein(wlin,X0,y0))
+    # out of sample with no transform
+    wout,Xout,yout = linear_regression(len(t_setout),t_setout,lda1)
+    print 'For 1 vs 5 Eout = %s'%(compute_Ein(wlin,Xout,yout))
+    # in sample with transform
+    t_set_trans = transform_t_set(t_set)
+    wtrans,Xtrans,ytrans = linear_regression(len(t_set_trans),t_set_trans,lda1)
+    # out of sample with transform        
+    t_setout = transform_t_set(t_setout)
+    wt,xt,yt = linear_regression(len(t_setout),t_setout,lda1)
+    print 'For 1 vs 5 with transformation Ein = %s'%(compute_Ein(wtrans,Xtrans,ytrans))
+    print 'For 1 vs 5 with transformation Eout = %s'%(compute_Ein(wtrans,xt,yt))
+    
+    print '--------------------------------------------------'
+    print 'lambda is: %s'%(lda2)
+    # in sample with no transform
+    wlin2,X02,y02 = linear_regression(len(t_set),t_set,lda2)
+    print 'For 1 vs 5 Ein = %s'%(compute_Ein(wlin2,X02,y02))
+    # out of sample with no transform
+    wout2,Xout2,yout2 = linear_regression(len(t_setout2),t_setout2,lda2)
+    print 'For 1 vs 5 Eout = %s'%(compute_Ein(wlin2,Xout2,yout2))
+    # in sample with transform
+    t_set_trans2 = transform_t_set(t_set)
+    wtrans2,Xtrans2,ytrans2 = linear_regression(len(t_set_trans2),t_set_trans2,lda2)
+    # out of sample with transform        
+    t_setout2 = transform_t_set(t_setout2)
+    wt2,xt2,yt2 = linear_regression(len(t_setout2),t_setout2,lda2)
+    print 'For 1 vs 5 with transformation Ein = %s'%(compute_Ein(wtrans2,Xtrans2,ytrans2))
+    print 'For 1 vs 5 with transformation Eout = %s'%(compute_Ein(wtrans2,xt2,yt2))
+
+
+
 
 
 def tests():
