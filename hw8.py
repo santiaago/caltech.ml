@@ -272,6 +272,47 @@ def run_rbf_kernel(dTrain,dTest):
         print 'For C = %s \tEout = %s'%(Cs[i],Eouts[i])
     print 'Min value for Eout is : %s'%(min(Eouts))
 
+def run_reg_linear_reg_one_vs_all(dTrain,dTest):
+    from numpy import zeros
+    from numpy.linalg import pinv
+    from numpy import eye
+    from numpy import size
+    from numpy import array
+    from numpy import dot
+    from tools import linear_regression
+    from hw2 import compute_Ein
+    from hw2 import transform_t_set
+    lda = 0.01
+
+    for i in range(0,10):
+        dTrain_current = getDataOneVsAll(dTrain,i)
+        t_set = []
+        # in sample
+        for d in dTrain_current:
+            t_set.append([[1,d[1],d[2]],d[0]])
+        # out of sample
+        dTest_current = getDataOneVsAll(dTest,i)
+        t_setout = []
+        for d in dTest_current:
+            t_setout.append([[1,d[1],d[2]],d[0]])
+        # in sample with no transform
+        wlin,X0,y0 = linear_regression(len(t_set),t_set)
+        print 'For %s vs all Ein = %s'%(i,compute_Ein(wlin,X0,y0))
+        # out of sample with no transform
+        wout,Xout,yout = linear_regression(len(t_setout),t_setout)
+        print 'For %s vs all Eout = %s'%(i,compute_Ein(wlin,Xout,yout))
+        # in sample with transform
+        t_set_trans = transform_t_set(t_set)
+        wtrans,Xtrans,ytrans = linear_regression(len(t_set_trans),t_set_trans)
+        # out of sample with transform        
+        t_setout = transform_t_set(t_setout)
+        wt,xt,yt = linear_regression(len(t_setout),t_setout)
+        print 'For %s vs all with transformation Eout = %s'%(i,compute_Ein(wtrans,xt,yt))
+
+def run_reg_linear_reg_one_vs_one(dTrain,dTest):
+    return None
+
+
 def tests():
     dFeaturesTrain = getDataFeatures('features.train')
     dFeaturesTest = getDataFeatures('features.test')
@@ -285,7 +326,10 @@ def tests():
     #run_1vs5_q2_q5(dFeaturesTrain,dFeaturesTest)
     print '-7-'
     print '-8-'
-    run_cross_validation(dFeaturesTrain,dFeaturesTest)
+    #run_cross_validation(dFeaturesTrain,dFeaturesTest)
     print '-9-'
     print '-10-'
     #run_rbf_kernel(dFeaturesTrain,dFeaturesTest)
+    print '-Bonus-'
+    run_reg_linear_reg_one_vs_all(dFeaturesTrain,dFeaturesTest)
+    run_reg_linear_reg_one_vs_one(dFeaturesTrain,dFeaturesTest)

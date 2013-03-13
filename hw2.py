@@ -184,13 +184,6 @@ def compute_Eout(wlin,f,N_points):
 def compute_Ein(wlin, X, y):
     'fraction of in sample points which got classified incorrectly'
     N = len(y)
-    print X
-    print '--'
-    print 'wlin'
-    print wlin
-    print 'dot'
-    print dot(X,wlin)
-    raw_input()
     g_vector = sign(dot(X,wlin))
     
     vEin = g_vector - y
