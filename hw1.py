@@ -106,7 +106,6 @@ def evaluate_diff_f_g(f,w):
         if sign_f != sign_g: diff = diff + 1
 
     return diff/(count*1.0)
-        
     
 def run_PLA(N_samples,N_points):
     samples = []# vector of 1 clasified, 0 misclassified
