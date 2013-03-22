@@ -1,5 +1,19 @@
-from svmutil import svm_train
+from numpy import array
+from numpy import dot
+from numpy import eye
+from numpy import size
+from numpy import zeros
+from numpy.linalg import pinv
+
 from svmutil import svm_predict
+from svmutil import svm_train
+
+from random import shuffle
+
+from tools import linear_regression
+
+from hw2 import compute_Ein
+from hw2 import transform_t_set
 
 def getDataFeatures(filename):
     'from file return list of items in the form of [digit, symmerty, intensity]'
@@ -194,9 +208,6 @@ def run_1vs5_q2_q5(dTrain,dTest):
 
 def run_cross_validation(dTrain,dTest):
     'Work with Polynomal kernel with cross validation'
-    from svmutil import svm_train
-    from svmutil import svm_predict
-    from random import shuffle
     print '--run_cross_validation--'
 
     print '-- 1 versus 5 with Q = 2 and Cross Validation--'
@@ -225,14 +236,11 @@ def run_cross_validation(dTrain,dTest):
     print
     for i in range(len(Ecvs)):
         print 'Ecv = %s \tfor C = %s'%(sum(Ecvs[i])/100.,Cs[i])
-
     print
     
-
 def run_rbf_kernel(dTrain,dTest):
     'Work on Radial Basis function'
-    from svmutil import svm_train
-    from svmutil import svm_predict
+    
     print '--run_rbf_kernel--'
     
     # Get data for 1 vs 5
@@ -273,15 +281,7 @@ def run_rbf_kernel(dTrain,dTest):
     print 'Min value for Eout is : %s'%(min(Eouts))
 
 def run_reg_linear_reg_one_vs_all(dTrain,dTest):
-    from numpy import zeros
-    from numpy.linalg import pinv
-    from numpy import eye
-    from numpy import size
-    from numpy import array
-    from numpy import dot
-    from tools import linear_regression
-    from hw2 import compute_Ein
-    from hw2 import transform_t_set
+
     lda = 1.0
 
     for i in range(0,10):
@@ -310,15 +310,7 @@ def run_reg_linear_reg_one_vs_all(dTrain,dTest):
         print 'For %s vs all with transformation Eout = %s'%(i,compute_Ein(wtrans,xt,yt))
 
 def run_reg_linear_reg_one_vs_one(dTrain,dTest):
-    from numpy import zeros
-    from numpy.linalg import pinv
-    from numpy import eye
-    from numpy import size
-    from numpy import array
-    from numpy import dot
-    from tools import linear_regression
-    from hw2 import compute_Ein
-    from hw2 import transform_t_set
+
     lda1 = 0.01
     lda2 = 1
     # 1 vs 5
