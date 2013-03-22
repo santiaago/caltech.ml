@@ -1,3 +1,25 @@
+from numpy import array
+from numpy import dot
+from numpy import sign
+from numpy import transpose
+from numpy.linalg import pinv # pseudo inverse aka dagger
+from numpy.linalg import norm
+
+from random import randint
+
+from hw1 import PLA
+
+from tools import build_training_set
+from tools import build_training_set_fmultipleparams
+from tools import data
+from tools import input_data_matrix
+from tools import linear_regression
+from tools import pseudo_inverse
+from tools import print_avg
+from tools import randomline
+from tools import sign
+from tools import target_function
+from tools import target_vector
 
 N_COINS = 1000
 N_TOSS = 10
@@ -5,10 +27,8 @@ N_EXPERIMENT = 100000
 HEAD = 0
 TAILS = 1
 
-from random import randint
-
-#--------------------------------------------------
-#Hoeffding inequality
+#--------------------------------------------------------------------------
+#Hoeffding
 
 def hoeffding_inequality():
     '''average experiment on N_EXPERIMENT times
@@ -46,7 +66,6 @@ def hoeffding_inequality():
     v1 = 0.500339
     vrand = 0.500511
     vmin = 0.03751'''
-    
 
 def fractionOfHeads(c):
     'fractions of Heads in list c'
@@ -84,28 +103,6 @@ def flip_coin(n = N_TOSS):
 
 #--------------------------------------------------------------------------
 #Linear regresion
-
-from tools import data
-from tools import randomline
-from tools import target_function
-from tools import build_training_set
-from tools import build_training_set_fmultipleparams
-from tools import sign
-from tools import print_avg
-from tools import linear_regression
-from tools import target_vector
-from tools import input_data_matrix
-from tools import pseudo_inverse
-
-from hw1 import PLA
-
-from numpy import array
-from numpy import transpose
-from numpy import dot
-from numpy import sign
-from numpy.linalg import pinv as pinv # pseudo inverse aka dagger
-from numpy.linalg import norm
-
 
 verbose_lr = False
 

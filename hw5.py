@@ -1,15 +1,14 @@
 from copy import copy
 
 from math import exp
-from math import sqrt
 from math import log
-
-from random import shuffle
+from math import sqrt
 
 from numpy import array
 from numpy import dot
-from numpy import array
 from numpy.linalg import norm
+
+from random import shuffle
 
 from tools import target_random_function
 from tools import randomline

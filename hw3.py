@@ -1,4 +1,3 @@
-
 from math import exp
 
 EPSILON = .05

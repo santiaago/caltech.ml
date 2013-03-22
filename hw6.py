@@ -1,18 +1,17 @@
-
 from numpy import array
-from numpy import transpose
 from numpy import dot
 from numpy import sign
-from numpy.linalg import pinv as pinv # pseudo inverse aka dagger
+from numpy import transpose
+from numpy import identity
 from numpy.linalg import inv
 from numpy.linalg import norm
-from numpy import identity
+from numpy.linalg import pinv # pseudo inverse aka dagger
 
-from tools import target_vector
-from tools import input_data_matrix
-from tools import pseudo_inverse
 from tools import data_from_file
+from tools import input_data_matrix
 from tools import linear_regression
+from tools import pseudo_inverse
+from tools import target_vector
 
 KA = -3
 LAMBDA = 10**KA

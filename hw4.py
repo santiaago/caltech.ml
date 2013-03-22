@@ -1,11 +1,11 @@
-
 from math import log
-from math import sqrt
 from math import sin
+from math import sqrt
 from math import pi
 
-from tools import data_interval
 from random import uniform
+
+from tools import data_interval
 
 def generalization_error(dvc,confidence,gen_err, iterations=10):
     'from the VC generalization bound and using the Sample Complexity algorithm page:57'

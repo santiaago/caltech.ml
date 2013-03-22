@@ -1,14 +1,17 @@
-from math import sqrt
-from math import fabs
-
-from numpy import dot
-from numpy import sign
-from numpy import array
-
 #cvxopt Python Software for Convex Optimization: http://abel.ee.ucla.edu/cvxopt/
 from cvxopt import solvers
 from cvxopt import spmatrix
 from cvxopt import matrix
+
+from numpy import array
+from numpy import dot
+from numpy import sign
+
+from math import fabs
+from math import sqrt
+
+from hw1 import evaluate_diff_f_g
+from hw1 import PLA
 
 from tools import build_training_set
 from tools import data
@@ -18,9 +21,6 @@ from tools import linear_regression
 from tools import randomline
 from tools import target_function
 from tools import target_vector
-
-from hw1 import evaluate_diff_f_g
-from hw1 import PLA
 
 def compute_Eval(wlin, X, y):
     'fraction of in sample points which got classified incorrectly from Validation data set'
@@ -35,7 +35,7 @@ def compute_Eval(wlin, X, y):
     return nEin / (len(vEin) *1.0)
 
 def compute_Eout_from_data(w,t_set_out,N_points):
-    'number of out-of-sample points misclassifed / total number of out-of-sample points from data'
+    'number of out-of-sample points misclassifed/total number of out-of-sample points from data'
     
     X_matrix = input_data_matrix(t_set_out)
     y_vector = target_vector(t_set_out)

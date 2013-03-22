@@ -1,4 +1,3 @@
-
 '''The Perceptron Learning Algorithm
 In this problem, you will create your own target function f and data set D to see
 how the Perceptron Learning Algorithm works. Take d = 2 so you can visualize the
@@ -12,8 +11,8 @@ evaluate the target function on each xn to get the corresponding output yn.'''
 
 '''Part 1
 Take N = 10. Run the Perceptron Learning Algorithm to nd g and measure
-the dierence between f and g as Pr(f(x) =6 g(x)) (you can either calculate
-this exactly, or approximate it by generating a suciently large separate set of
+the difference between f and g as Pr(f(x) =6 g(x)) (you can either calculate
+this exactly, or approximate it by generating a sufciently large separate set of
 points to evaluate it). Repeat the experiment for 1000 runs (as specied above)
 and take the average. Start the PLA with the weight vector w being all zeros,
 and at each iteration have the algorithm choose a point randomly from the set
@@ -21,17 +20,17 @@ of misclassifed points.
 How many iterations does it take on average for the PLA to converge for N = 10
 training points? Pick the value closest to your results (again, closest is the
 answer that makes the expression jyour answer  given optionj closest to 0).'''
-from random import uniform
-from random import randint
-
-from tools import data
-from tools import randomline
-from tools import target_function
-from tools import build_training_set
-from tools import sign
 
 from numpy import array
 
+from random import uniform
+from random import randint
+
+from tools import build_training_set
+from tools import data
+from tools import randomline
+from tools import sign
+from tools import target_function
 
 def build_misclassified_set(t_set,w):
     '''returns a tuple of index of t_set items

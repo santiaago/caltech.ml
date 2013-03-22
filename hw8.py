@@ -283,7 +283,6 @@ def run_rbf_kernel(dTrain,dTest):
 def run_reg_linear_reg_one_vs_all(dTrain,dTest):
 
     lda = 1.0
-
     for i in range(0,10):
         dTrain_current = getDataOneVsAll(dTrain,i)
         t_set = []
@@ -341,8 +340,7 @@ def run_reg_linear_reg_one_vs_one(dTrain,dTest):
     t_setout = transform_t_set(t_setout)
     wt,xt,yt = linear_regression(len(t_setout),t_setout,lda1)
     print 'For 1 vs 5 with transformation Ein = %s'%(compute_Ein(wtrans,Xtrans,ytrans))
-    print 'For 1 vs 5 with transformation Eout = %s'%(compute_Ein(wtrans,xt,yt))
-    
+    print 'For 1 vs 5 with transformation Eout = %s'%(compute_Ein(wtrans,xt,yt))   
     print '--------------------------------------------------'
     print 'lambda is: %s'%(lda2)
     # in sample with no transform
