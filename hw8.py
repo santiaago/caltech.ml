@@ -369,9 +369,6 @@ def run_reg_linear_reg_one_vs_one(dTrain,dTest):
     print 'For 1 vs 5 with transformation Eout = %s'%(compute_Ein(wtrans2,xt2,yt2))
 
 
-
-
-
 def tests():
     dFeaturesTrain = getDataFeatures('features.train')
     dFeaturesTest = getDataFeatures('features.test')
@@ -390,5 +387,6 @@ def tests():
     print '-10-'
     #run_rbf_kernel(dFeaturesTrain,dFeaturesTest)
     print '-Bonus-'
-    run_reg_linear_reg_one_vs_all(dFeaturesTrain,dFeaturesTest)
-    run_reg_linear_reg_one_vs_one(dFeaturesTrain,dFeaturesTest)
+    #run_reg_linear_reg_one_vs_all(dFeaturesTrain,dFeaturesTest)
+    #run_reg_linear_reg_one_vs_one(dFeaturesTrain,dFeaturesTest)
+

@@ -69,6 +69,13 @@ def target_random_function(coords):
             return -1.0
     return f
 
+def signex(x,compare_to = 0):
+    'returns +1 or -1 by comparing (x) to (compare_to) param (by default = 0)'
+    if x > compare_to:
+        return +1.
+    else:
+        return -1.
+
 def sign(x,compare_to = 0):
     'returns +1 or -1 by comparing (x) to (compare_to) param (by default = 0)'
     if x > compare_to:
