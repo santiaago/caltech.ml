@@ -8,8 +8,7 @@ from numpy import eye
 from numpy import size
 
 def data_interval(low_b,high_b,N=100):
-    '''returns a vector of (N) values. 
-    Values are uniformly distributed between low boundary (low_b) and high boundary (high_b)'''
+    'returns a list of N values uniformly distributed between low boundary and high boundary'
     d = []
     for i in range(N):
         d.append(uniform(low_b,high_b))
